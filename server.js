@@ -43,11 +43,11 @@ function clientConnected(client,clientId){
     client.send(JSON.stringify(clients[clientId]))
 }
 
-function clientDisconnected(clientId){
-  const client = clients[clientId]
-  if (!client) return
-  delete clients[clientId]
-}
+// function clientDisconnected(clientId){
+//   const client = clients[clientId]
+//   if (!client) return
+//   delete clients[clientId]
+// }
 function updateClientCount(){
   const totalClientsMessage = {
       type: "userCountChanged",
@@ -96,7 +96,6 @@ wss.on('connection', (client) => {
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   client.on('close', () => {
     updateClientCount();
-    clientDisconnected(clientId);
     console.log('Client disconnected');
   })
 });
