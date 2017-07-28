@@ -69,7 +69,7 @@ wss.on('connection', (client) => {
     const outMessage = JSON.parse(message);
     outMessage.id = uuid();
 
-    let imageCheck = outMessage.content.match(/\.(jpeg|jpg|gif|png)$/mi)
+    let imageCheck = outMessage.content.match(/https?:\/\/.*\.(jpeg|jpg|gif|png)$/mi)
 
 
     switch(outMessage.type) {
