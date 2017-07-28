@@ -26,7 +26,7 @@ function broadcast(message){
 const colorList = []
 let clients = {}
 const totalColors = 7
-for (var i = 0 i < totalColors i++){
+for (var i = 0; i < totalColors; i++){
   randomColor = '#'+Math.floor(Math.random()*16777215).toString(16)
   colorList.push(randomColor)
 }
