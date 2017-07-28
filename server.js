@@ -33,6 +33,7 @@ function changeColor(){
   const index = (Math.floor(Math.random() * 4))
   return colorList[index]
 }
+
 function clientConnected(client,clientId){
   clients[clientId] ={
     id: clientId,
@@ -40,12 +41,19 @@ function clientConnected(client,clientId){
     color: changeColor()
   }
     client.send(JSON.stringify(clients[clientId]))
-    // broadcast()
 }
+
 function clientDisconnected(clientId){
   const client = clients[clientId]
   if (!client) return
   delete clients[clientId]
+}
+function updateClientCount(){
+  const totalClientsMessage = {
+      type: "userCountChanged",
+      userCount: wss.clients.size
+    }
+  broadcast(totalClientsMessage)
 }
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
@@ -56,25 +64,25 @@ wss.on('connection', (client) => {
   const clientId = uuid();
   clientConnected(client,clientId)
 
-  const outMessage = {
-    type: "userCountChanged",
-    userCount: wss.clients.size
-  }
-  broadcast(outMessage)
-
+  updateClientCount();
   client.on('message', (message) =>{
     const outMessage = JSON.parse(message);
     outMessage.id = uuid();
-    // let test = outMessage.content.match(/^takbot/i)
-    // if (test){
-    //   console.log('RegEx passed');
-    // }
+
+    let imageCheck = outMessage.content.match(/\.(jpeg|jpg|gif|png)$/mi)
+
 
     switch(outMessage.type) {
       case "postMessage":
-        outMessage.type = "incomingMessage";
-        console.log(`User ${outMessage.username} said ${outMessage.content}`)
+        if (imageCheck){
+          outMessage.type = "incomingImage"
+          console.log(`User ${outMessage.username} sent an image`)
         break;
+        } else {
+          outMessage.type = "incomingMessage";
+          console.log(`User ${outMessage.username} said ${outMessage.content}`)
+          break;
+        }
       case "postNotification":
         outMessage.type = "incomingNotification"
         console.log(outMessage.content)
@@ -87,7 +95,7 @@ wss.on('connection', (client) => {
   })
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   client.on('close', () => {
-    broadcast(outMessage)
+    updateClientCount();
     clientDisconnected(clientId);
     console.log('Client disconnected');
   })
